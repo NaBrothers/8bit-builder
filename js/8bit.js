@@ -27,17 +27,17 @@ var pulseOptions = {
     
 //button
 var startButton = document.getElementById('sbutton');
-var restartButton = document.getElementById('rsbutton');
+//var restartButton = document.getElementById('rsbutton');
 //player
 var kickPlayer = new Tone.Player({
     "url" : "./audio/kick.wav"
-}).toMaster(); //kickPlayer.loop = true;
+}).toMaster();
 var snarePlayer = new Tone.Player({
     "url" : "./audio/snare.wav"
-}).toMaster(); //snarePlayer.loop = true;
+}).toMaster();
 var hhPlayer = new Tone.Player({
     "url" : "./audio/hh.wav"
-}).toMaster(); //hhPlayer.loop = true;
+}).toMaster();
 //synth
 var polySynth = new Tone.PolySynth(6, Tone.Synth, squareOptions2).toMaster();//和弦
 //polySynth.set("detune", -1200);
@@ -49,6 +49,9 @@ var polyPart = new Tone.Part();
 var trianglePart = new Tone.Part();
 var squarePart = new Tone.Part();
 var pulsePart = new Tone.Part();
+var hhPart = new Tone.Part();
+var kickPart = new Tone.Part();
+var snarePart = new Tone.Part();
 var audioCtx = new AudioContext();
 var noteArr = ['C', 'C#', 'D', 'D#', 'E', 'F','F#', 'G', 'G#', 'A', 'A#', 'B']; //音符列表
 var chordArr = {
@@ -77,13 +80,33 @@ var melody = [];
 var melody2 = [];
 var melody3 = [];
 var bass = [];
+var hhrhythm = [];
+var kickrhythm = [];
+var snarerhythm = [];
 var bpm = 120;
 
+var order = 0;
+
 function start() {
+    let myorder = ++order;
+    //停止所有音轨
+    Tone.Transport.stop();
+    // squarePart.stop();
+    // trianglePart.stop();
+    // polyPart.stop();
+    squarePart.removeAll();
+    trianglePart.removeAll();
+    polyPart.removeAll();
+    hhPart.removeAll();
+    kickPart.removeAll();
+    snarePart.removeAll();
     melody = [];
     melody2 = [];
     melody3 = [];
     bass = [];
+    hhrhythm = [];
+    kickrhythm = [];
+    snarerhythm = [];
     bpm =  Math.round(Math.random()*80) + 80;
     let barNumber = 8;
     let timePerLattice = (60/bpm)/2;
@@ -104,7 +127,10 @@ function start() {
         chord[i] = Math.floor(Math.random()*modeChord.length);
     }
     for (var i = 0; i < barNumber*8; i++){
+        if (i%2 == 0) hhrhythm.push({'time':i*timePerLattice});
+        if (i%8 == 4) snarerhythm.push({'time':i*timePerLattice});
         if (i%8 == 0){
+            kickrhythm.push({'time':i*timePerLattice});
             let chordNum = chord[i/8];
             barNoteArr = modeNote.concat();
             let minorSecond = [];
@@ -161,7 +187,7 @@ function start() {
                 'note': noteArr[barNoteArr[Math.floor(Math.random()*barNoteArr.length)]]+'4',
                 'duration': timePerLattice,
                 'time': i*timePerLattice,
-                'velocity': 2
+                'velocity': 1
             });
         }
     }
@@ -170,6 +196,7 @@ function start() {
     console.log(bass);
     squarePart.removeAll();
     squarePart = new Tone.Part(function (time, note) {
+        console.log('square'+time)
         squareSynth.triggerAttackRelease(note.note, note.duration, time,note.velocity)
     }, melody);
     trianglePart.removeAll();
@@ -184,52 +211,96 @@ function start() {
     polyPart = new Tone.Part(function (time, note) {
         polySynth.triggerAttackRelease(note.note, note.duration, time, note.velocity)
     }, melody3);
+    hhPart.removeAll();
+    hhPart = new Tone.Part(function (time) {
+        console.log('hh'+time)
+        hhPlayer.start(time);
+        hhPlayer.stop((time+timePerLattice));
+    }, hhrhythm);
+    kickPart.removeAll();
+    kickPart = new Tone.Part(function (time) {
+        kickPlayer.start(time);
+        kickPlayer.stop((time+timePerLattice));
+    }, kickrhythm);
+    snarePart.removeAll();
+    snarePart = new Tone.Part(function (time) {
+        snarePlayer.start(time);
+        snarePlayer.stop((time+timePerLattice));
+    }, snarerhythm);
+
+    squarePart.loop = true;
+    squarePart.loopStart = 0;
+    squarePart.loopEnd = barNumber*8*30/bpm;
+    trianglePart.loop = true;
+    trianglePart.loopStart = 0;
+    trianglePart.loopEnd = barNumber*8*30/bpm;
+    polyPart.loop = true;
+    polyPart.loopStart = 0;
+    polyPart.loopEnd = barNumber*8*30/bpm;
+    hhPart.loop = true;
+    hhPart.loopStart = 0;
+    hhPart.loopEnd = barNumber*8*30/bpm;
+    kickPart.loop = true;
+    kickPart.loopStart = 0;
+    kickPart.loopEnd = barNumber*8*30/bpm;
+    snarePart.loop = true;
+    snarePart.loopStart = 0;
+    snarePart.loopEnd = barNumber*8*30/bpm;
+    //开始播放
     Tone.Transport.start('+0.1', 0);
     squarePart.start(0);
     trianglePart.start(0);
     polyPart.start(0);
     //pulsePart.start(0);
-    for (var i = 0; i < 64; i++){
-        if (i%2 == 0){
-            hhPlayer.start('+'+i*timePerLattice);
-            hhPlayer.stop('+'+(i+1)*timePerLattice);
-        }
-        if (i%8 == 0){
-            kickPlayer.start('+'+i*timePerLattice);
-            kickPlayer.stop('+'+(i+1)*timePerLattice);
-        }
-        if (i%8 == 4){
-            snarePlayer.start('+'+i*timePerLattice);
-            snarePlayer.stop('+'+(i+1)*timePerLattice);
-        }
-    }
-    Tone.Transport.stop('+'+Math.ceil(barNumber*8*30/bpm));
+    console.log(hhrhythm);
+    console.log(kickrhythm);
+    console.log(snarerhythm);
+    hhPart.start(0);
+    kickPart.start(0);
+    snarePart.start(0);
+    // for (var i = basetime; i < 8*barNumber+basetime; i++){
+    //     if (i%2 == 0){
+    //         hhPlayer.start('+'+i*timePerLattice);
+    //         hhPlayer.stop('+'+(i+1)*timePerLattice);
+    //     }
+    //     if (i%8 == 0){
+    //         kickPlayer.start('+'+i*timePerLattice);
+    //         kickPlayer.stop('+'+(i+1)*timePerLattice);
+    //     }
+    //     if (i%8 == 4){
+    //         snarePlayer.start('+'+i*timePerLattice);
+    //         snarePlayer.stop('+'+(i+1)*timePerLattice);
+    //     }
+    // }
+        
+    //Tone.Transport.stop('+'+Math.ceil(barNumber*8*30/bpm));
+    
 }
 
-function restart(){
-    let barNumber = 8;
-    let timePerLattice = (60/bpm)/2;
-    Tone.Transport.start('+0.1', 0);
-    squarePart.start(0);
-    trianglePart.start(0);
-    polyPart.start(0);
-    //pulsePart.start(0);
-    for (var i = 0; i < 64; i++){
-        if (i%2 == 0){
-            hhPlayer.start('+'+i*timePerLattice);
-            hhPlayer.stop('+'+(i+1)*timePerLattice);
-        }
-        if (i%8 == 0){
-            kickPlayer.start('+'+i*timePerLattice);
-            kickPlayer.stop('+'+(i+1)*timePerLattice);
-        }
-        if (i%8 == 4){
-            snarePlayer.start('+'+i*timePerLattice);
-            snarePlayer.stop('+'+(i+1)*timePerLattice);
-        }
-    }
-    Tone.Transport.stop('+'+Math.ceil(barNumber*8*30/bpm));
-}
+// function restart(){
+//     let barNumber = 8;
+//     let timePerLattice = (60/bpm)/2;
+//     Tone.Transport.start('+0.1', 0);
+//     squarePart.start(0);
+//     trianglePart.start(0);
+//     polyPart.start(0);
+//     //pulsePart.start(0);
+//     for (var i = 0; i < 64; i++){
+//         if (i%2 == 0){
+//             hhPlayer.start('+'+i*timePerLattice);
+//             hhPlayer.stop('+'+(i+1)*timePerLattice);
+//         }
+//         if (i%8 == 0){
+//             kickPlayer.start('+'+i*timePerLattice);
+//             kickPlayer.stop('+'+(i+1)*timePerLattice);
+//         }
+//         if (i%8 == 4){
+//             snarePlayer.start('+'+i*timePerLattice);
+//             snarePlayer.stop('+'+(i+1)*timePerLattice);
+//         }
+//     }
+//     Tone.Transport.stop('+'+Math.ceil(barNumber*8*30/bpm));
+// }
 
 function setOpern(player, opern, timePerLattice=0.25){
     for (var i = 0; i < opern.length; i++){
@@ -245,4 +316,4 @@ function setOpern(player, opern, timePerLattice=0.25){
 
 startButton.addEventListener('click', ()=>start())
 
-restartButton.addEventListener('click', ()=>restart())
+//restartButton.addEventListener('click', ()=>restart())
