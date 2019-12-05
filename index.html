@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles/style.css">
-
+    <link rel="stylesheet" href="./styles/style.css">
+    <link rel="shortcut icon" href="./img/favicon.ico" type="image/x-icon">
     <title>8bit Builder</title>
 </head>
 
@@ -23,6 +23,7 @@
 
         button.addEventListener("mousedown", function () { button.src = './img/button_on.png' })
         button.addEventListener("mouseup", function () { button.src = './img/button_off.png' })
+        button.addEventListener("mouseleave", function () { button.src = './img/button_off.png' })
 
     </script>
 </body>

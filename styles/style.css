@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'LLPIXEL';
-    src:url('./font/LLPIXEL.TTF');
+    src:url('../font/LLPIXEL.TTF');
 }
 html {
     height: 100%;
