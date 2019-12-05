@@ -1,14 +1,30 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <title>8bit</title>
-    </head>
-    <body>
-        <button id="sbutton">start</button>
-        <button id="rsbutton">restart</button>
-        <script src="js/Tone.js"></script>
-        <script src="js/8bit.js"></script>
-        <script>
-        </script>
-    </body>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/style.css">
+
+    <title>8bit Builder</title>
+</head>
+
+<body>
+    <div class="main">
+        <h1><a href="https://github.com/NaBrothers/8bit-music" target="blank">8bit Builder</a></h1>
+        <img src="img/button_off.png" alt="button_off" id="sbutton">
+        <!-- <button id="sbutton">start</button>
+        <button id="rsbutton">restart</button> -->
+    </div>
+    <script src="js/Tone.js"></script>
+    <script src="js/8bit.js"></script>
+    <script>
+        let button = document.getElementById("sbutton");
+
+        button.addEventListener("mousedown", function () { button.src = '/img/button_on.png' })
+        button.addEventListener("mouseup", function () { button.src = '/img/button_off.png' })
+
+    </script>
+</body>
+
 </html>
